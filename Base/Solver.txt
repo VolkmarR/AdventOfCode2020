@@ -1,0 +1,36 @@
+﻿using AdventOfCode.Base;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace Day[Day]
+{
+    public class Day[Day]Tests
+    {
+        private readonly ITestOutputHelper Output;
+        public Day[Day]Tests(ITestOutputHelper output) => Output = output;
+
+        [Fact]
+        public void RunStep1() => Output.WriteLine(new Day[Day]Solver().ExecutePuzzle1());
+        
+        [Fact]
+        public void RunStep2() => Output.WriteLine(new Day[Day]Solver().ExecutePuzzle2());
+    }
+
+    public class Day[Day]Solver : SolverBase
+    {
+        protected override string Solve1(List<string> data)
+        {
+            return "??";
+        }
+
+        protected override string Solve2(List<string> data)
+        {
+            return "??";
+        }
+
+    }
+}
