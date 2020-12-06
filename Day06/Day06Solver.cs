@@ -46,7 +46,7 @@ namespace Day06
         }
 
 
-        protected override string Solve1()
+        protected override object Solve1()
         {
             var result = 0;
             foreach(var group in Groups)
@@ -58,10 +58,10 @@ namespace Day06
                 result += answers.Count;
             }
 
-            return result.ToString();
+            return result;
         }
 
-        protected override string Solve2()
+        protected override object Solve2()
         {
             var result = 0;
             foreach (var group in Groups)
@@ -77,7 +77,7 @@ namespace Day06
                 result += answers.Count(q => q.Value == group.Answers.Count);
             }
 
-            return result.ToString();
+            return result;
         }
 
     }

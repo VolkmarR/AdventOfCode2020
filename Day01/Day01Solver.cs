@@ -27,28 +27,29 @@ namespace Day01
         protected override void Parse(List<string> data)
             => Data = data.Select(q => int.Parse(q)).ToList();
 
-        protected override string Solve1()
+        protected override object Solve1()
         {
             for (int i = 0; i < Data.Count; i++)
                 for (int j = i +1; j < Data.Count; j++)
                 {
                     if (Data[i] + Data[j] == 2020)
-                        return (Data[i] * Data[j]).ToString();
+                        return (Data[i] * Data[j]);
                 }
 
-            return "??";
+            throw new Exception("Solver Exception");
         }
 
-        protected override string Solve2()
+        protected override object Solve2()
         {
             for (int i = 0; i < Data.Count; i++)
                 for (int j = i + 1; j < Data.Count; j++)
                     for (int k = j + 1; k < Data.Count; k++)
                     {
                         if (Data[i] + Data[j] + Data[k] == 2020)
-                        return (Data[i] * Data[j] * Data[k]).ToString();
+                        return (Data[i] * Data[j] * Data[k]);
                 }
-            return "??";
+
+            throw new Exception("Solver Exception");
         }
 
     }

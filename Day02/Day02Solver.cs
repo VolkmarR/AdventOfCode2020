@@ -45,10 +45,10 @@ namespace Day02
         protected override void Parse(List<string> data)
             => Data = data.Select(ParsePassword).ToList();
 
-        protected override string Solve1()
-            => Data.Count(Valid1).ToString();
+        protected override object Solve1()
+            => Data.Count(Valid1);
 
-        protected override string Solve2()
-            => Data.Count(Valid2).ToString();
+        protected override object Solve2()
+            => Data.Count(Valid2);
     }
 }

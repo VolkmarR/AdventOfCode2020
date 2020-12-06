@@ -22,19 +22,19 @@ namespace AdventOfCode.Base
         public string ExecutePuzzle1(string inputFileName = "input.txt", string outputFileName = "output1.txt")
         {
             Parse(Load(inputFileName));
-            return Save(outputFileName, Solve1());
+            return Save(outputFileName, Solve1()?.ToString());
         }
 
         public string ExecutePuzzle2(string inputFileName = "input.txt", string outputFileName = "output2.txt")
         {
             Parse(Load(inputFileName));
-            return Save(outputFileName, Solve2());
+            return Save(outputFileName, Solve2()?.ToString());
         }
 
         protected abstract void Parse(List<string> data);
 
-        protected abstract string Solve1();
+        protected abstract object Solve1();
 
-        protected abstract string Solve2();
+        protected abstract object Solve2();
     }
 }

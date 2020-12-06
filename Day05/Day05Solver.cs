@@ -54,21 +54,22 @@ namespace Day05
         protected override void Parse(List<string> data)
             => Tickets = data.Select(ParseTicket).ToList();
 
-        protected override string Solve1()
-            => Tickets.Max(q => q.SeatID).ToString();
+        protected override object Solve1()
+            => Tickets.Max(q => q.SeatID);
 
-        protected override string Solve2()
+        protected override object Solve2()
         {
             var seatIDs = Tickets.Select(q => q.SeatID).OrderBy(q => q).ToList();
             var last = seatIDs.First() + 1;
             foreach (var item in seatIDs.Skip(1))
             {
                 if (last != item)
-                    return last.ToString();
+                    return last;
 
                 last++;
             }
-            return "??";
+
+            throw new Exception("Solver error");
         }
 
     }

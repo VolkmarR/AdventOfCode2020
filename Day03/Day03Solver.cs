@@ -60,17 +60,17 @@ namespace Day03
             return trees;
         }
 
-        protected override string Solve1()
-            => CountTrees(3, 1).ToString();
+        protected override object Solve1()
+            => CountTrees(3, 1);
 
-        protected override string Solve2()
+        protected override object Solve2()
         {
             var deltas = new List<(int x, int y)> { (1, 1), (3, 1), (5, 1), (7, 1), (1, 2) };
             long trees = 1;
             foreach ((int x, int y) in deltas)
                 trees *= CountTrees(x, y);
 
-            return trees.ToString();
+            return trees;
         }
 
     }
