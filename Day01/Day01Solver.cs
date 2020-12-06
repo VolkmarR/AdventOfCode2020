@@ -22,30 +22,34 @@ namespace Day01
 
     public class Day01Solver : SolverBase
     {
-        protected override string Solve1(List<string> data)
+        List<int> Data;
+
+        protected override void Parse(List<string> data)
+            => Data = data.Select(q => int.Parse(q)).ToList();
+
+        protected override object Solve1()
         {
-            var input = data.Select(q => int.Parse(q)).ToList();
-            for (int i = 0; i < input.Count; i++)
-                for (int j = i +1; j < input.Count; j++)
+            for (int i = 0; i < Data.Count; i++)
+                for (int j = i +1; j < Data.Count; j++)
                 {
-                    if (input[i] + input[j] == 2020)
-                        return (input[i] * input[j]).ToString();
+                    if (Data[i] + Data[j] == 2020)
+                        return (Data[i] * Data[j]);
                 }
 
-            return "??";
+            throw new Exception("Solver Exception");
         }
 
-        protected override string Solve2(List<string> data)
+        protected override object Solve2()
         {
-            var input = data.Select(q => int.Parse(q)).ToList();
-            for (int i = 0; i < input.Count; i++)
-                for (int j = i + 1; j < input.Count; j++)
-                    for (int k = j + 1; k < input.Count; k++)
+            for (int i = 0; i < Data.Count; i++)
+                for (int j = i + 1; j < Data.Count; j++)
+                    for (int k = j + 1; k < Data.Count; k++)
                     {
-                        if (input[i] + input[j] + input[k] == 2020)
-                        return (input[i] * input[j] * input[k]).ToString();
+                        if (Data[i] + Data[j] + Data[k] == 2020)
+                        return (Data[i] * Data[j] * Data[k]);
                 }
-            return "??";
+
+            throw new Exception("Solver Exception");
         }
 
     }

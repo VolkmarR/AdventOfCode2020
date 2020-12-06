@@ -22,15 +22,21 @@ namespace Day[Day]
 
     public class Day[Day]Solver : SolverBase
     {
-        protected override string Solve1(List<string> data)
+        // List<??> Data;
+
+        protected override void Parse(List<string> data)
         {
-            return "??";
+            // Data = new();
         }
 
-        protected override string Solve2(List<string> data)
+        protected override string Solve1()
         {
-            return "??";
+            throw new Exception("Solver error");
         }
 
+        protected override string Solve2()
+        {
+            throw new Exception("Solver error");
+        }
     }
 }

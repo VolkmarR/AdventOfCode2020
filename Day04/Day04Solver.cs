@@ -41,7 +41,7 @@ namespace Day04
             }
         }
 
-        void Parse(List<string> data)
+        protected override void Parse(List<string> data)
         {
             Passports = new List<Dictionary<string, string>>();
 
@@ -88,7 +88,6 @@ namespace Day04
         static bool ValidPassportID(string value)
             => value.Length == 9 && value.All(q => char.IsDigit(q));
 
-
         Dictionary<string, Func<string, bool>> ValidKeys2 = new Dictionary<string, Func<string, bool>>
         {
             { "byr", q => ValidIntBetween(q, 1920, 2002) },
@@ -103,19 +102,11 @@ namespace Day04
         bool Valid2(Dictionary<string, string> passport)
             => ValidKeys2.Keys.All(q => passport.TryGetValue(q, out var value) && ValidKeys2[q](value));
 
-        protected override string Solve1(List<string> data)
-        {
-            Parse(data);
+        protected override object Solve1()
+            => Passports.Count(Valid1);
 
-            return Passports.Count(Valid1).ToString();
-        }
-
-        protected override string Solve2(List<string> data)
-        {
-            Parse(data);
-
-            return Passports.Count(Valid2).ToString();
-        }
+        protected override object Solve2()
+            => Passports.Count(Valid2);
 
     }
 }

@@ -51,28 +51,25 @@ namespace Day05
         Ticket ParseTicket(string line)
             => new Ticket(ParsePath(line.Substring(0, 7), 128), ParsePath(line.Substring(7, 3), 8));
 
-        void Parse(List<string> data)
+        protected override void Parse(List<string> data)
             => Tickets = data.Select(ParseTicket).ToList();
 
-        protected override string Solve1(List<string> data)
-        {
-            Parse(data);
-            return Tickets.Max(q => q.SeatID).ToString();
-        }
+        protected override object Solve1()
+            => Tickets.Max(q => q.SeatID);
 
-        protected override string Solve2(List<string> data)
+        protected override object Solve2()
         {
-            Parse(data);
             var seatIDs = Tickets.Select(q => q.SeatID).OrderBy(q => q).ToList();
             var last = seatIDs.First() + 1;
             foreach (var item in seatIDs.Skip(1))
             {
                 if (last != item)
-                    return last.ToString();
+                    return last;
 
                 last++;
             }
-            return "??";
+
+            throw new Exception("Solver error");
         }
 
     }

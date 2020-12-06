@@ -25,7 +25,7 @@ namespace Day06
     {
         List<Group> Groups;
 
-        void Parse(List<string> data)
+        protected override void Parse(List<string> data)
         {
             Group group = null;
             void AddGroup()
@@ -46,9 +46,8 @@ namespace Day06
         }
 
 
-        protected override string Solve1(List<string> data)
+        protected override object Solve1()
         {
-            Parse(data);
             var result = 0;
             foreach(var group in Groups)
             {
@@ -59,27 +58,23 @@ namespace Day06
                 result += answers.Count;
             }
 
-            return result.ToString();
+            return result;
         }
 
-        protected override string Solve2(List<string> data)
+        protected override object Solve2()
         {
-            Parse(data);
             var result = 0;
             foreach (var group in Groups)
             {
                 var answers = new Dictionary<char, int>();
                 foreach (var answer in group.Answers)
                     foreach (var item in answer)
-                    {
-                        answers.TryGetValue(item, out var answerCount);
-                        answers[item] = ++answerCount;
-                    }
+                        answers.IncrementCount(item);
 
                 result += answers.Count(q => q.Value == group.Answers.Count);
             }
 
-            return result.ToString();
+            return result;
         }
 
     }

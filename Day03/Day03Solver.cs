@@ -27,7 +27,8 @@ namespace Day03
         int X_max;
         int Y_max;
         bool[,] Map;
-        void Parse(List<string> data)
+        
+        protected override void Parse(List<string> data)
         {
             X_max = data[0].Length;
             Y_max = data.Count;
@@ -59,21 +60,17 @@ namespace Day03
             return trees;
         }
 
-        protected override string Solve1(List<string> data)
-        {
-            Parse(data);
-            return CountTrees(3, 1).ToString();
-        }
+        protected override object Solve1()
+            => CountTrees(3, 1);
 
-        protected override string Solve2(List<string> data)
+        protected override object Solve2()
         {
-            Parse(data);
             var deltas = new List<(int x, int y)> { (1, 1), (3, 1), (5, 1), (7, 1), (1, 2) };
             long trees = 1;
             foreach ((int x, int y) in deltas)
                 trees *= CountTrees(x, y);
 
-            return trees.ToString();
+            return trees;
         }
 
     }
