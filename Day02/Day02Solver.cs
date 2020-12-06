@@ -38,7 +38,7 @@ namespace Day02
 
         Password ParsePassword(string line)
         {
-            var parts = line.Split(new char[] { '-', ':', ' ', }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var parts = line.Split(StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries, '-', ':', ' ');
             return new Password(int.Parse(parts[0]), int.Parse(parts[1]), parts[2][0], parts[3]);
         }
 

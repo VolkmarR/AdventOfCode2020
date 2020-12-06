@@ -69,10 +69,7 @@ namespace Day06
                 var answers = new Dictionary<char, int>();
                 foreach (var answer in group.Answers)
                     foreach (var item in answer)
-                    {
-                        answers.TryGetValue(item, out var answerCount);
-                        answers[item] = ++answerCount;
-                    }
+                        answers.IncrementCount(item);
 
                 result += answers.Count(q => q.Value == group.Answers.Count);
             }

@@ -10,6 +10,20 @@ namespace AdventOfCode.Base
     {
         public static string Join(this IEnumerable<string> strings, string separator)
             => string.Join(separator, strings);
+
+
+        public static void IncrementCount<T>(this Dictionary<T, int> countDictionary, T key)
+        {
+            countDictionary.TryGetValue(key, out var current);
+            countDictionary[key] = ++current;
+        }
+
+        public static string[] Split(this string text, StringSplitOptions stringSplitOptions, params char[] separators)
+            => text.Split(separators, stringSplitOptions);
+        
+        public static string[] Split(this string text, params char[] separators)
+            => text.Split(separators);
+
     }
 
 
