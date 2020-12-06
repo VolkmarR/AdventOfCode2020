@@ -31,12 +31,12 @@ namespace Day[Day]
 
         protected override string Solve1()
         {
-            return "??";
+            throw new Exception("Solver error");
         }
 
         protected override string Solve2()
         {
-            return "??";
+            throw new Exception("Solver error");
         }
     }
 }
