@@ -25,7 +25,7 @@ namespace Day06
     {
         List<Group> Groups;
 
-        void Parse(List<string> data)
+        protected override void Parse(List<string> data)
         {
             Group group = null;
             void AddGroup()
@@ -46,9 +46,8 @@ namespace Day06
         }
 
 
-        protected override string Solve1(List<string> data)
+        protected override string Solve1()
         {
-            Parse(data);
             var result = 0;
             foreach(var group in Groups)
             {
@@ -62,9 +61,8 @@ namespace Day06
             return result.ToString();
         }
 
-        protected override string Solve2(List<string> data)
+        protected override string Solve2()
         {
-            Parse(data);
             var result = 0;
             foreach (var group in Groups)
             {

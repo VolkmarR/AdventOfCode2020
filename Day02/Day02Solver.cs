@@ -24,11 +24,7 @@ namespace Day02
 
     public class Day02Solver : SolverBase
     {
-        Password Parse(string line)
-        {
-            var parts = line.Split(new char[] { '-', ':', ' ', }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            return new Password(int.Parse(parts[0]), int.Parse(parts[1]), parts[2][0], parts[3]);
-        }
+        List<Password> Data;
 
         bool Valid1(Password password)
         {
@@ -40,12 +36,19 @@ namespace Day02
             return password.password.ElementAtOrDefault(password.min - 1) == password.letter ^ password.password.ElementAtOrDefault(password.max - 1) == password.letter;
         }
 
-        protected override string Solve1(List<string> data)
-            => data.Select(Parse).Count(Valid1).ToString();
+        Password ParsePassword(string line)
+        {
+            var parts = line.Split(new char[] { '-', ':', ' ', }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return new Password(int.Parse(parts[0]), int.Parse(parts[1]), parts[2][0], parts[3]);
+        }
 
-        protected override string Solve2(List<string> data)
-            => data.Select(Parse).Count(Valid2).ToString();
+        protected override void Parse(List<string> data)
+            => Data = data.Select(ParsePassword).ToList();
 
+        protected override string Solve1()
+            => Data.Count(Valid1).ToString();
 
+        protected override string Solve2()
+            => Data.Count(Valid2).ToString();
     }
 }
