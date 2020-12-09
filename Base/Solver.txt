@@ -29,12 +29,12 @@ namespace Day[Day]
             // Data = new();
         }
 
-        protected override string Solve1()
+        protected override object Solve1()
         {
             throw new Exception("Solver error");
         }
 
-        protected override string Solve2()
+        protected override object Solve2()
         {
             throw new Exception("Solver error");
         }
