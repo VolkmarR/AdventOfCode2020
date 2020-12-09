@@ -1,4 +1,4 @@
-﻿using AdventOfCode.Base;
+using AdventOfCode.Base;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,21 +6,21 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Day[Day]
+namespace Day08
 {
-    public class Day[Day]Tests
+    public class Day08Tests
     {
         private readonly ITestOutputHelper Output;
-        public Day[Day]Tests(ITestOutputHelper output) => Output = output;
+        public Day08Tests(ITestOutputHelper output) => Output = output;
 
         [Fact]
-        public void RunStep1() => Output.WriteLine(new Day[Day]Solver().ExecutePuzzle1());
+        public void RunStep1() => Output.WriteLine(new Day08Solver().ExecutePuzzle1());
         
         [Fact]
-        public void RunStep2() => Output.WriteLine(new Day[Day]Solver().ExecutePuzzle2());
+        public void RunStep2() => Output.WriteLine(new Day08Solver().ExecutePuzzle2());
     }
 
-    public class Day[Day]Solver : SolverBase
+    public class Day08Solver : SolverBase
     {
         // List<??> Data;
 
