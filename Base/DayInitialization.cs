@@ -18,7 +18,10 @@ namespace AdventOfCode.Base
             var dayDir = projectDir + @"\Day" + dayStr + "\\";
 
             if (Directory.Exists(dayDir))
+            {
                 Console.WriteLine($"Directory {dayDir} was already initialized");
+                return;
+            }
 
             Directory.CreateDirectory(dayDir);
 
