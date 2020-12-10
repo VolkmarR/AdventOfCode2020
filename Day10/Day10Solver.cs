@@ -27,6 +27,7 @@ namespace Day10
         protected override void Parse(List<string> data)
         {
             Data = data.Select(q => int.Parse(q)).OrderBy(q => q).ToList();
+            Data.Insert(0, 0);
             Data.Add(Data.Max() + 3);
         }
 
@@ -34,7 +35,7 @@ namespace Day10
         {
             var counters = new int[] { 0, 0, 0 };
             var current = 0;
-            foreach (var item in Data)
+            foreach (var item in Data.Skip(1))
             {
                 var diff = item - current;
                 counters[diff - 1]++;
@@ -47,29 +48,24 @@ namespace Day10
 
         protected override object Solve2()
         {
-            long combinations = 0;
+            var combinations = 1L;
 
-            void CountCombinations(int current, int startIndex)
+            var i = 0;
+            while (i < Data.Count)
             {
-                while (startIndex + 1 < Data.Count && Data[startIndex + 1] - current > 3)
-                {
-                    current = Data[startIndex];
-                    startIndex++;
-                }
+                var j = 1;
+                while (i + j < Data.Count && Data[i + j] - Data[i + j - 1] == 1)
+                    j++;
 
-                if (startIndex == Data.Count)
-                {
-                    combinations++;
-                    return;
-                }
+                i += j;
 
-                for (int i = startIndex; i < Data.Count && Data[i] - current <= 3; i++)
-                    CountCombinations(Data[i], i + 1);
+                j-=2;
+                if (j > 0)
+                    combinations *= (long)((j * j + j + 2) / 2);
             }
-
-            CountCombinations(0, 0);
 
             return combinations;
         }
+
     }
 }
