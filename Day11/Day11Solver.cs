@@ -69,43 +69,75 @@ namespace Day11
                 CountAdjacentSeat(1, -1) + CountAdjacentSeat(1, 0) + CountAdjacentSeat(1, 1);
         }
 
+        int CountVisibleAdjacentSeats(char[,] data, int x, int y)
+        {
+            int CountAdjacentSeat(int deltaX, int deltaY)
+            {
+                var nX = x + deltaX;
+                var nY = y + deltaY;
+                while (nX > 0 && nY > 0 && nX < MaxX && nY < MaxY)
+                {
+                    if (data[nX, nY] == '#')
+                        return 1;
+                    if (data[nX, nY] == 'L')
+                        return 0;
+                    nX = nX + deltaX;
+                    nY = nY + deltaY;
+                }
+                return 0;
+            }
 
-        char[,] Fill(char[,] data)
+            return CountAdjacentSeat(-1, -1) + CountAdjacentSeat(-1, 0) + CountAdjacentSeat(-1, 1) +
+                CountAdjacentSeat(0, -1) + CountAdjacentSeat(0, 1) +
+                CountAdjacentSeat(1, -1) + CountAdjacentSeat(1, 0) + CountAdjacentSeat(1, 1);
+        }
+
+
+        char MutateSeat(char current, int countOccpuied, int maxCountForCleat)
+        {
+            if (current == 'L' && countOccpuied == 0)
+                return '#';
+            if (current == '#' && countOccpuied >= maxCountForCleat)
+                return 'L';
+
+            return current;
+        }
+
+        char[,] Fill1(char[,] data)
         {
             var result = Init();
             foreach ((var x, var y) in AllSeats())
-            {
-                var count = data[x, y] != '.' ? CountAdjacentSeats(data, x, y) : 0;
-                if (data[x, y] == 'L' && count == 0)
-                    result[x, y] = '#';
-                else if (data[x, y] == '#' && count >= 4)
-                    result[x, y] = 'L';
-                else
-                    result[x, y] = data[x, y];
-            }
+                result[x, y] = MutateSeat(data[x, y], CountAdjacentSeats(data, x, y), 4);
 
             return result;
         }
 
-        bool Equal(char[,] item1, char[,] item2)
+        char[,] Fill2(char[,] data)
         {
+            var result = Init();
             foreach ((var x, var y) in AllSeats())
-                if (item1[x, y] != item2[x, y])
-                    return false;
-            return true;
+                result[x, y] = MutateSeat(data[x, y], CountVisibleAdjacentSeats(data, x, y), 5);
+
+            return result;
         }
+
+
+        bool Equal(char[,] item1, char[,] item2)
+            => AllSeats().All(q => item1[q.x, q.y] == item2[q.x, q.y]);
 
         int CountOccupiedSeats(char[,] item)
             => AllSeats().Sum(q => item[q.x, q.y] == '#' ? 1 : 0);
 
+
+
         protected override object Solve1()
         {
+            char[,] data;
             var newData = Data;
-            var data = Data;
             do
             {
                 data = newData;
-                newData = Fill(data);
+                newData = Fill1(data);
             } while (!Equal(data, newData));
 
             return CountOccupiedSeats(newData);
@@ -113,7 +145,15 @@ namespace Day11
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            char[,] data;
+            var newData = Data;
+            do
+            {
+                data = newData;
+                newData = Fill2(data);
+            } while (!Equal(data, newData));
+
+            return CountOccupiedSeats(newData);
         }
     }
 }
