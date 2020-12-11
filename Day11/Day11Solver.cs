@@ -61,99 +61,66 @@ namespace Day11
                 Data[x, y] = data[y - 1][x - 1];
         }
 
-        int CountAdjacentSeats(char[,] data, int x, int y)
-        {
-            int CountAdjacentSeat(int deltaX, int deltaY) => data[x + deltaX, y + deltaY] == '#' ? 1 : 0;
-            return CountAdjacentSeat(-1, -1) + CountAdjacentSeat(-1, 0) + CountAdjacentSeat(-1, 1) +
-                CountAdjacentSeat(0, -1) + CountAdjacentSeat(0, 1) +
-                CountAdjacentSeat(1, -1) + CountAdjacentSeat(1, 0) + CountAdjacentSeat(1, 1);
-        }
+        int CountAdjacentSeat(int x, int y, int deltaX, int deltaY) => Data[x + deltaX, y + deltaY] == '#' ? 1 : 0;
 
-        int CountVisibleAdjacentSeats(char[,] data, int x, int y)
+        int CountVisibleAdjacentSeat(int x, int y, int deltaX, int deltaY)
         {
-            int CountAdjacentSeat(int deltaX, int deltaY)
+            var nX = x + deltaX;
+            var nY = y + deltaY;
+            while (nX > 0 && nY > 0 && nX < MaxX && nY < MaxY)
             {
-                var nX = x + deltaX;
-                var nY = y + deltaY;
-                while (nX > 0 && nY > 0 && nX < MaxX && nY < MaxY)
-                {
-                    if (data[nX, nY] == '#')
-                        return 1;
-                    if (data[nX, nY] == 'L')
-                        return 0;
-                    nX = nX + deltaX;
-                    nY = nY + deltaY;
-                }
-                return 0;
+                if (Data[nX, nY] == '#')
+                    return 1;
+                if (Data[nX, nY] == 'L')
+                    return 0;
+                nX = nX + deltaX;
+                nY = nY + deltaY;
             }
-
-            return CountAdjacentSeat(-1, -1) + CountAdjacentSeat(-1, 0) + CountAdjacentSeat(-1, 1) +
-                CountAdjacentSeat(0, -1) + CountAdjacentSeat(0, 1) +
-                CountAdjacentSeat(1, -1) + CountAdjacentSeat(1, 0) + CountAdjacentSeat(1, 1);
+            return 0;
         }
 
-
-        char MutateSeat(char current, int countOccpuied, int maxCountForCleat)
+        char MutateSeat(int x, int y, Func<int, int, int, int, int> countAdjacentSeat, int maxCountForClear)
         {
-            if (current == 'L' && countOccpuied == 0)
+            var countOccpuied = countAdjacentSeat(x, y, -1, -1) + countAdjacentSeat(x, y, -1, 0) + countAdjacentSeat(x, y, -1, 1) +
+                countAdjacentSeat(x, y, 0, -1) + countAdjacentSeat(x, y, 0, 1) +
+                countAdjacentSeat(x, y, 1, -1) + countAdjacentSeat(x, y, 1, 0) + countAdjacentSeat(x, y, 1, 1);
+
+            if (Data[x, y] == 'L' && countOccpuied == 0)
                 return '#';
-            if (current == '#' && countOccpuied >= maxCountForCleat)
+            if (Data[x, y] == '#' && countOccpuied >= maxCountForClear)
                 return 'L';
 
-            return current;
+            return Data[x, y];
         }
 
-        char[,] Fill1(char[,] data)
+        char[,] Fill(Func<int, int, int, int, int> countAdjacentSeat, int maxCountForClear)
         {
             var result = Init();
             foreach ((var x, var y) in AllSeats())
-                result[x, y] = MutateSeat(data[x, y], CountAdjacentSeats(data, x, y), 4);
+                result[x, y] = MutateSeat(x, y, countAdjacentSeat, maxCountForClear);
 
             return result;
         }
 
-        char[,] Fill2(char[,] data)
-        {
-            var result = Init();
-            foreach ((var x, var y) in AllSeats())
-                result[x, y] = MutateSeat(data[x, y], CountVisibleAdjacentSeats(data, x, y), 5);
-
-            return result;
-        }
-
-
-        bool Equal(char[,] item1, char[,] item2)
-            => AllSeats().All(q => item1[q.x, q.y] == item2[q.x, q.y]);
+        bool Equal(char[,] compareItem)
+            => AllSeats().All(q => Data[q.x, q.y] == compareItem[q.x, q.y]);
 
         int CountOccupiedSeats(char[,] item)
             => AllSeats().Sum(q => item[q.x, q.y] == '#' ? 1 : 0);
 
-
-
-        protected override object Solve1()
+        int Solve(Func<int, int, int, int, int> countAdjacentSeat, int maxCountForClear)
         {
-            char[,] data;
             var newData = Data;
             do
             {
-                data = newData;
-                newData = Fill1(data);
-            } while (!Equal(data, newData));
+                Data = newData;
+                newData = Fill(countAdjacentSeat, maxCountForClear);
+            } while (!Equal(newData));
 
             return CountOccupiedSeats(newData);
         }
+        protected override object Solve1() => Solve(CountAdjacentSeat, 4);
 
-        protected override object Solve2()
-        {
-            char[,] data;
-            var newData = Data;
-            do
-            {
-                data = newData;
-                newData = Fill2(data);
-            } while (!Equal(data, newData));
-
-            return CountOccupiedSeats(newData);
-        }
+        protected override object Solve2() => Solve(CountVisibleAdjacentSeat, 5);
     }
 }
