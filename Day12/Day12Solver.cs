@@ -29,6 +29,8 @@ namespace Day12
         List<string> DirectionsRotateLeft = new List<string> { "N", "W", "S", "E" };
 
         string ShipFacing = "E";
+        int ShipPositionNorthSouth = 0;
+        int ShipPositionEastWest = 0;
         int PositionNorthSouth = 0;
         int PositionEastWest = 0;
 
@@ -43,7 +45,23 @@ namespace Day12
             return DirectionsRotateLeft[index];
         }
 
-        void Move(string direction, int value)
+        void RotateWaypoint(int degree)
+        {
+            var offset = (degree / 90 % 4);
+            for (int i = 0; i < Math.Abs(offset); i++)
+            {
+                var tmp = PositionEastWest;
+                PositionEastWest = PositionNorthSouth;
+                PositionNorthSouth = tmp;
+
+                if (offset < 0)
+                    PositionNorthSouth = -PositionNorthSouth;
+                else
+                    PositionEastWest = -PositionEastWest;
+            }
+        }
+
+        void MoveNSEW(string direction, int value)
         {
             if (direction == "N")
                 PositionNorthSouth += value;
@@ -53,12 +71,33 @@ namespace Day12
                 PositionEastWest += value;
             else if (direction == "W")
                 PositionEastWest -= value;
+        }
+
+        void Move1(string direction, int value)
+        {
+            if (direction == "F")
+                Move1(ShipFacing, value);
             else if (direction == "L")
                 ShipFacing = Rotate(ShipFacing, value);
             else if (direction == "R")
                 ShipFacing = Rotate(ShipFacing, -value);
-            else if (direction == "F")
-                Move(ShipFacing, value);
+            else
+                MoveNSEW(direction, value);
+        }
+
+        void Move2(string direction, int value)
+        {
+            if (direction == "F")
+            {
+                ShipPositionEastWest += PositionEastWest * value;
+                ShipPositionNorthSouth += PositionNorthSouth * value;
+            }
+            else if (direction == "L")
+                RotateWaypoint(value);
+            else if (direction == "R")
+                RotateWaypoint(-value);
+            else
+                MoveNSEW(direction, value);
         }
 
         Action ParseAction(string item)
@@ -72,14 +111,20 @@ namespace Day12
         protected override object Solve1()
         {
             foreach (var item in Data)
-                Move(item.Direction, item.Units);
+                Move1(item.Direction, item.Units);
 
             return Math.Abs(PositionNorthSouth) + Math.Abs(PositionEastWest);
         }
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            PositionNorthSouth = 1;
+            PositionEastWest = 10;
+
+            foreach (var item in Data)
+                Move2(item.Direction, item.Units);
+
+            return Math.Abs(ShipPositionNorthSouth) + Math.Abs(ShipPositionEastWest);
         }
     }
 }
