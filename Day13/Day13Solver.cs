@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using System.Threading.Tasks;
 
 namespace Day13
 {
@@ -40,7 +41,7 @@ namespace Day13
                 offset++;
             }
 
-            DataForSorting.OrderByDescending(q => q.time);
+            DataForSorting = DataForSorting.OrderByDescending(q => q.time).ToList();
             Data = DataForSorting.Select(q => q.time).ToList();
             DataOffset = DataForSorting.Select(q => q.offset).ToList();
         }
@@ -60,10 +61,11 @@ namespace Day13
             return (best - EarliestDepartTime) * Data[nextStart.IndexOf(best)];
         }
 
+        /*
         protected override object Solve2()
         {
             // long startTimeStamp = NextStartTime(Data[0], 1013728);
-            long startTimeStamp = NextStartTime(Data[0], 100_000_000_000_000);
+            long startTimeStamp = NextStartTime(Data[0], 90_000_000_000_000);
             var counters = new long[Data.Count];
             for (var i = 0; i < Data.Count; i++)
                 counters[i] = NextStartTime(Data[i], startTimeStamp) - DataOffset[i] - startTimeStamp;
@@ -82,6 +84,49 @@ namespace Day13
             }
 
             return counters[0] + startTimeStamp;
+        }
+
+        */
+
+
+
+        protected override object Solve2()
+        {
+            var counters = new long[Data.Count];
+            var Incrememt = new long[Data.Count];
+            long starter = 100_000_000_000_000;
+
+            void Init(int index, int reference)
+            {
+                long start = -DataOffset[index];
+                while (start < 0)
+                    start += Data[index];
+
+                while ((start + DataOffset[reference]) % Data[reference] != 0)
+                    start += Data[index];
+
+                Incrememt[index] = Data[index] * Data[reference];
+                counters[index] = start + starter - starter % Incrememt[index];
+            }
+
+            Init(0, 1);
+            for (var i = 1; i < Data.Count; i++)
+                Init(i, 0);
+
+            var notAllEqual = true;
+            while (notAllEqual)
+            {
+                counters[0] += Incrememt[0];
+                notAllEqual = false;
+                for (int i = 1; i < counters.Length; i++)
+                {
+                    while (counters[i] < counters[0])
+                        counters[i] += Incrememt[i];
+                    notAllEqual = notAllEqual || counters[0] != counters[i];
+                }
+            }
+
+            return counters[0];
         }
     }
 }
