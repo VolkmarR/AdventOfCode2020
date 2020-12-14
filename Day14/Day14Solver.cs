@@ -16,19 +16,21 @@ namespace Day14
 
         [Fact]
         public void RunStep1() => Output.WriteLine(new Day14Solver().ExecutePuzzle1());
-        
+
         [Fact]
         public void RunStep2() => Output.WriteLine(new Day14Solver().ExecutePuzzle2());
     }
 
 
-    public record Instruction(string mask, uint address, long value);
+    public record Instruction(string mask, long address, long value);
+
+    public record Mask(long maskAnd, long maskOr);
 
     public class Day14Solver : SolverBase
     {
         List<Instruction> Data;
         Dictionary<long, long> Mem = new Dictionary<long, long>();
-        string currentMask = null;
+        Mask CurrentMask = null;
 
 
         private Instruction ParseInstruction(string line)
@@ -36,8 +38,28 @@ namespace Day14
             if (line.StartsWith("mask ="))
                 return new Instruction(line[7..], 0, 0);
 
-            var parts = line.Split(StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries,  '[', ']', '=');
-            return new Instruction(null, uint.Parse(parts[1]), uint.Parse(parts[2]));
+            var parts = line.Split(StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries, '[', ']', '=');
+            return new Instruction(null, long.Parse(parts[1]), uint.Parse(parts[2]));
+        }
+
+        Mask BuildMask(string mask)
+        {
+            var maskAnd = long.MaxValue; // to set 0
+            var maskOr = 0L; // to set 1
+
+            for (int i = 0; i < mask.Length; i++)
+            {
+                var bit = mask[mask.Length - 1 - i];
+                if (bit != 'X')
+                {
+                    long bitValue = (long)Math.Pow(2, i);
+                    if (bit == '0')
+                        maskAnd -= bitValue;
+                    else if (bit == '1')
+                        maskOr += bitValue;
+                }
+            }
+            return new Mask(maskAnd, maskOr);
         }
 
         protected override void Parse(List<string> data)
@@ -46,30 +68,14 @@ namespace Day14
         }
 
         long ApplyMask(long value)
-        {
-            var result = new BitArray(BitConverter.GetBytes(value));
-
-            for (int i = 0; i < currentMask.Length; i++)
-                if (currentMask[i] != 'X')
-                    result.Set(currentMask.Length - i - 1, currentMask[i] == '1');
-            //         100000000 (9)
-            //         0
-            //  0000000100000000
-            //  16 - (16 - 9 + i) =  
-            var newValue = 0L;
-            for (int i = 0; i < result.Length; i++)
-                if (result[i])
-                    newValue += (long)Math.Pow(2, i);
-
-            return newValue;
-        }
+            => (value & CurrentMask.maskAnd) | CurrentMask.maskOr;
 
         void Handle(Instruction instruction)
         {
             if (instruction.mask != null)
-                currentMask = instruction.mask;
+                CurrentMask = BuildMask(instruction.mask);
             else
-                Mem[instruction.address] = ApplyMask(instruction.value); 
+                Mem[instruction.address] = ApplyMask(instruction.value);
         }
 
         protected override object Solve1()
