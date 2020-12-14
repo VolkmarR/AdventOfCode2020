@@ -31,7 +31,8 @@ namespace Day14
         List<Instruction> Data;
         Dictionary<long, long> Mem = new Dictionary<long, long>();
         Mask CurrentMask = null;
-
+        List<Mask> CurrentAddressMasks = new List<Mask>();
+        StringBuilder Builder = new StringBuilder(36);
 
         private Instruction ParseInstruction(string line)
         {
@@ -44,7 +45,7 @@ namespace Day14
 
         Mask BuildMask(string mask)
         {
-            var maskAnd = long.MaxValue; // to set 0
+            var maskAnd = (long)Math.Pow(2, 37) - 1; // to set 0
             var maskOr = 0L; // to set 1
 
             for (int i = 0; i < mask.Length; i++)
@@ -62,33 +63,75 @@ namespace Day14
             return new Mask(maskAnd, maskOr);
         }
 
+        void AssignAddressMask(string mask)
+        {
+            CurrentMask = BuildMask(mask);
+            CurrentAddressMasks.Clear();
+            AddAddressMask(mask, 0);
+        }
+
+        string SetBit(string mask, int index, char value)
+            => mask[0..index] + value + mask[(index + 1)..];
+
+        void AddAddressMask(string mask, int startBit)
+        {
+            for (int i = startBit; i < mask.Length; i++)
+            {
+                if (mask[i] == 'X')
+                {
+                    AddAddressMask(SetBit(mask, i, '0'), i + 1);
+                    AddAddressMask(SetBit(mask, i, '1'), i + 1);
+                    return;
+                }
+                else
+                    mask = SetBit(mask, i, 'X');
+            }
+
+            CurrentAddressMasks.Add(BuildMask(mask));
+        }
+
         protected override void Parse(List<string> data)
         {
             Data = data.Select(ParseInstruction).ToList();
         }
 
-        long ApplyMask(long value)
-            => (value & CurrentMask.maskAnd) | CurrentMask.maskOr;
+        long ApplyMask1(Mask mask, long value)
+            => (value & mask.maskAnd) | mask.maskOr;
 
-        void Handle(Instruction instruction)
-        {
-            if (instruction.mask != null)
-                CurrentMask = BuildMask(instruction.mask);
-            else
-                Mem[instruction.address] = ApplyMask(instruction.value);
-        }
+        long ApplyMask2(Mask mask, long value)
+            => value | mask.maskOr;
 
         protected override object Solve1()
         {
             foreach (var item in Data)
-                Handle(item);
+            {
+                if (item.mask != null)
+                    CurrentMask = BuildMask(item.mask);
+                else
+                    Mem[item.address] = ApplyMask1(CurrentMask, item.value);
+            }
 
-            return Mem.Values.Select(q => (long)q).Sum();
+            return Mem.Values.Sum();
         }
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            foreach (var item in Data)
+            {
+                if (item.mask != null)
+                    AssignAddressMask(item.mask);
+                else
+                {
+                    var address = ApplyMask2(CurrentMask, item.address);
+                    foreach (var addressMask in CurrentAddressMasks)
+                    {
+                        var address2 = ApplyMask1(addressMask, address);
+                        Mem[address2] = item.value;
+                    }
+                }
+            }
+
+            return Mem.Values.Sum();
         }
     }
 }
