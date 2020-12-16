@@ -29,6 +29,8 @@ namespace Day16
         List<Rule> Rules;
         List<Ticket> Tickets;
 
+        #region Parse
+
         void ParseRules(IEnumerable<string> data)
         {
             foreach (var item in data)
@@ -63,8 +65,43 @@ namespace Day16
             ParseTickets(data.SkipWhile(NotEmptyLine).Skip(1).TakeWhile(NotEmptyLine));
             ParseTickets(data.SkipWhile(NotEmptyLine).Skip(1).SkipWhile(NotEmptyLine).Skip(1));
         }
+        #endregion
 
+        #region Helper methods
         List<RuleBetween> GetAllRulesBetween() => Rules.SelectMany(q => q.rules, (a, b) => b).ToList();
+
+        bool MatchRuleBetween(RuleBetween rule, int value)
+            => value >= rule.start && value <= rule.end;
+
+        bool MatchRule(Rule rule, int value)
+            => MatchRuleBetween(rule.rules[0], value) || MatchRuleBetween(rule.rules[1], value);
+
+        Rule OnlyOneRuleMatch(List<int> values, List<Rule> rules)
+        {
+            Rule result = null;
+            foreach (var rule in rules)
+                if (values.All(q => MatchRule(rule, q)))
+                {
+                    if (result == null)
+                        result = rule;
+                    else
+                        return null;
+                }
+
+            return result;
+        }
+
+        void RemoveInvalidTickets()
+        {
+            var rulesBetween = GetAllRulesBetween();
+            var i = 0;
+            while (i < Tickets.Count)
+                if (Tickets[i].numbers.Any(q => !rulesBetween.Any(s => MatchRuleBetween(s, q))))
+                    Tickets.RemoveAt(i);
+                else
+                    i++;
+        }
+        #endregion
 
         protected override object Solve1()
         {
@@ -73,7 +110,7 @@ namespace Day16
 
             foreach (var item in Tickets)
             {
-                var invalid = item.numbers.Where(q => !rulesBetween.Any(s => q >= s.start && q <= s.end)).ToList();
+                var invalid = item.numbers.Where(q => !rulesBetween.Any(s => MatchRuleBetween(s, q))).ToList();
                 if (invalid.Count > 0)
                     invalidNumbers.AddRange(invalid);
             }
@@ -81,16 +118,8 @@ namespace Day16
             return invalidNumbers.Sum();
         }
 
-        void RemoveInvalidTickets()
-        {
-            var rulesBetween = GetAllRulesBetween();
-            var i = 0;
-            while (i < Tickets.Count)
-                if (Tickets[i].numbers.Any(q => !rulesBetween.Any(s => q >= s.start && q <= s.end)))
-                    Tickets.RemoveAt(i);
-                else
-                    i++;
-        }
+
+
 
         protected override object Solve2()
         {
@@ -105,23 +134,24 @@ namespace Day16
 
             while (rules.Count > 0)
             {
-                var match = new List<int>();
                 for (int i = 0; i < NumberRows.Count; i++)
                     if (!RuleForRow.ContainsKey(i))
                     {
-
+                        var onlyRule = OnlyOneRuleMatch(NumberRows[i], rules);
+                        if (onlyRule != null)
+                        {
+                            RuleForRow[i] = onlyRule;
+                            rules.Remove(onlyRule);
+                        }
                     }
-
-
-
-
             }
 
+            var result = 1L;
+            foreach (var item in RuleForRow)
+                if (item.Value.name.StartsWith("departure"))
+                    result *= Tickets[0].numbers[item.Key];
 
-
-
-
-            throw new Exception("Solver error");
+            return result;
         }
     }
 }
