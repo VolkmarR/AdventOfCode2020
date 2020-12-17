@@ -25,11 +25,6 @@ namespace Day17
     public class Day17Solver : SolverBase
     {
         HashSet<Point4D> Map;
-        int MinW = 0;
-        int MaxW = 0;
-        int MinZ = 0;
-        int MaxZ = 0;
-        int MinXY = 0;
         int MaxXY = 0;
 
         bool Get(HashSet<Point4D> map, int x, int y, int z, int w)
@@ -58,12 +53,7 @@ namespace Day17
                 }
 
             var current = Get(map, x, y, z, w);
-            if (current && count is 2 or 3)
-                return true;
-            if (!current && count is 3)
-                return true;
-
-            return false;
+            return (current && count is 2 or 3) || (!current && count is 3);
         }
 
         int SumMap(HashSet<Point4D> map)
@@ -79,11 +69,6 @@ namespace Day17
                     if (data[y][x] == '#')
                         Set(Map, x, y, 0, 0, true);
 
-            MinW = 0;
-            MaxW = 0;
-            MinZ = 0;
-            MaxZ = 0;
-            MinXY = 0;
             MaxXY = data.Count - 1;
         }
 
@@ -92,9 +77,9 @@ namespace Day17
             for (int i = 1; i <= 6; i++)
             {
                 var newMap = new HashSet<Point4D>();
-                for (int x = MinXY - i; x <= MaxXY + i; x++)
-                    for (int y = MinXY - i; y <= MaxXY + i; y++)
-                        for (int z = MinZ - i; z <= MaxZ + i; z++)
+                for (int x = -i; x <= MaxXY + i; x++)
+                    for (int y = -i; y <= MaxXY + i; y++)
+                        for (int z = -i; z <= i; z++)
                             Set(newMap, x, y, z, 0, GetNewState3D(Map, x, y, z, 0));
 
                 Map = newMap;
