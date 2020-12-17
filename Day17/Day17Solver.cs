@@ -20,57 +20,44 @@ namespace Day17
         public void RunStep2() => Output.WriteLine(new Day17Solver().ExecutePuzzle2());
     }
 
+    record Point4D(int x, int y, int z, int w);
+
     public class Day17Solver : SolverBase
     {
-        Dictionary<int, Dictionary<int, HashSet<int>>> Map;
+        HashSet<Point4D> Map;
+        int MinW = 0;
+        int MaxW = 0;
         int MinZ = 0;
         int MaxZ = 0;
         int MinXY = 0;
         int MaxXY = 0;
 
-        HashSet<int> GetXY(Dictionary<int, Dictionary<int, HashSet<int>>> map, int x, int y)
+        bool Get(HashSet<Point4D> map, int x, int y, int z, int w)
+            => map.Contains(new Point4D(x, y, z, w));
+
+        void Set(HashSet<Point4D> map, int x, int y, int z, int w, bool value)
         {
-            if (!map.TryGetValue(x, out var mapX))
-            {
-                mapX = new();
-                map[x] = mapX;
-            }
-
-            if (!mapX.TryGetValue(y, out var mapY))
-            {
-                mapY = new();
-                mapX[y] = mapY;
-            }
-
-            return mapY;
-        }
-
-        bool Get(Dictionary<int, Dictionary<int, HashSet<int>>> map, int x, int y, int z)
-            => GetXY(map, x, y).Contains(z);
-
-        void Set(Dictionary<int, Dictionary<int, HashSet<int>>> map, int x, int y, int z, bool value)
-        {
-            var mapZ = GetXY(map, x, y);
-            if (!value && mapZ.Contains(z))
-                mapZ.Remove(z);
+            var point = new Point4D(x, y, z, w);
+            if (!value && map.Contains(point))
+                map.Remove(point);
             else if (value)
-                mapZ.Add(z);
+                map.Add(point);
         }
 
-        bool GetNewState(Dictionary<int, Dictionary<int, HashSet<int>>> map, int x, int y, int z)
+        bool GetNewState3D(HashSet<Point4D> map, int x, int y, int z, int w)
         {
             int count = 0;
             for (int xx = x - 1; xx <= x + 1; xx++)
                 for (int yy = y - 1; yy <= y + 1; yy++)
                 {
                     for (int zz = z - 1; zz <= z + 1; zz++)
-                        if (Get(map, xx, yy, zz) && !(xx == x && yy == y && zz == z))
+                        if (Get(map, xx, yy, zz, w) && !(xx == x && yy == y && zz == z))
                             count++;
                     if (count > 3)
                         break;
                 }
 
-            var current = Get(map, x, y, z);
+            var current = Get(map, x, y, z, w);
             if (current && count is 2 or 3)
                 return true;
             if (!current && count is 3)
@@ -79,13 +66,9 @@ namespace Day17
             return false;
         }
 
-        int SumMap(Dictionary<int, Dictionary<int, HashSet<int>>> map)
+        int SumMap(HashSet<Point4D> map)
         {
-            var result = 0;
-            foreach (var mapX in map)
-                foreach (var mapY in mapX.Value)
-                    result += mapY.Value.Count;
-            return result;
+            return map.Count;
         }
 
         protected override void Parse(List<string> data)
@@ -94,8 +77,10 @@ namespace Day17
             for (int y = 0; y < data.Count; y++)
                 for (int x = 0; x < data[y].Length; x++)
                     if (data[y][x] == '#')
-                        Set(Map, x, y, 0, true);
+                        Set(Map, x, y, 0, 0, true);
 
+            MinW = 0;
+            MaxW = 0;
             MinZ = 0;
             MaxZ = 0;
             MinXY = 0;
@@ -104,14 +89,13 @@ namespace Day17
 
         protected override object Solve1()
         {
-
             for (int i = 1; i <= 6; i++)
             {
-                var newMap = new Dictionary<int, Dictionary<int, HashSet<int>>>();
+                var newMap = new HashSet<Point4D>();
                 for (int x = MinXY - i; x <= MaxXY + i; x++)
                     for (int y = MinXY - i; y <= MaxXY + i; y++)
                         for (int z = MinZ - i; z <= MaxZ + i; z++)
-                            Set(newMap, x, y, z, GetNewState(Map, x, y, z));
+                            Set(newMap, x, y, z, 0, GetNewState3D(Map, x, y, z, 0));
 
                 Map = newMap;
             }
