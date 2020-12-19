@@ -88,20 +88,21 @@ namespace Day19
         protected override object Solve1()
         {
             var rx = new Regex(Rules[0].RegEx);
-            var count = 0;
-            foreach (var item in Data)
-            {
-                var x = rx.Match(item);
-                if (x?.Value == item)
-                    count++;
-            }
-
-            return count;
+            return Data.Count(q => rx.Match(q)?.Value == q);
         }
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            var rx = new Regex(Rules[0].RegEx);
+            var count = Data.Count(q => rx.Match(q)?.Value == q);
+
+            Rules[8].RegEx = $"({Rules[42].RegEx}*)";
+            Rules[11].RegEx = $"({Rules[42].RegEx}+{Rules[31].RegEx}+)";
+            Rules[0].RegEx = "";
+            SetRegex(Rules[0]);
+
+            rx = new Regex(Rules[0].RegEx);
+            return count  + Data.Count(q => rx.Match(q)?.Value == q);
         }
     }
 }
