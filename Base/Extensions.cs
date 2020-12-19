@@ -31,6 +31,9 @@ namespace AdventOfCode.Base
             => text.Split(separators);
 
         public static List<string> ToList(this string item) => new List<string> { item };
+        public static int ToInt(this string item) => int.Parse(item);
+
+        public static long ToLong(this string item) => long.Parse(item);
     }
 
 
