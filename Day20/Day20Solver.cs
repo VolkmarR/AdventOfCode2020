@@ -20,17 +20,22 @@ namespace Day20
         public void RunStep2() => Output.WriteLine(new Day20Solver().ExecutePuzzle2());
     }
 
+    public class MapItem
+    {
+        public List<string> Map { get; set; }
+        public string[] Borders { get; set; }
+    }
+
     public class Tile
     {
         public long ID { get; set; }
-        public List<string> Map { get; set; }
-        public List<string[]> Border { get; set; }
+        public List<MapItem> Maps { get; set; }
     }
 
     public class PuzzeMatch
     {
         public Tile Tile { get; set; }
-        public int borderIndex { get; set; }
+        public int MapIndex { get; set; }
     }
 
     public class Day20Solver : SolverBase
@@ -46,31 +51,50 @@ namespace Day20
             return line;
         }
 
+        List<string> Rotate90(List<string> data)
+        {
+            var result = data.Select(q => "").ToList();
+            for (int y = 0; y < data.Count; y++)
+                for (int x = 0; x < data[0].Length; x++)
+                    result[y] += data[data.Count - 1 - x][y];
+
+            return result;
+        }
+
+        List<string> Flip(List<string> data)
+            => data.Select(q => q.Reverse()).ToList();
+
         Tile ParseTile(string tileLine, List<string> data)
         {
             var result = new Tile
             {
                 ID = tileLine[5..9].ToLong(),
-                Map = data,
-                Border = new List<string[]>()
+                Maps = new List<MapItem>()
             };
 
-            void AddRotate()
+            void AddMap(List<string> map)
             {
-                var last = result.Border.Last();
-                result.Border.Add(new string[] { last[3].Reverse(), last[0], last[1].Reverse(), last[2] });
+                for (int i = 0; i < 4; i++)
+                {
+                    result.Maps.Add(new MapItem
+                    {
+                        Map = map,
+                        Borders = new string[]
+                        {
+                        map[0],
+                        GetVerticalBorder(map, map[0].Length - 1),
+                        map[map.Count - 1],
+                        GetVerticalBorder(map, 0)
+                        }
+                    });
+                    map = Rotate90(map);
+                }
             }
 
-            result.Border.Add(new string[] { data[0], GetVerticalBorder(data, data[0].Length - 1), data[data.Count - 1], GetVerticalBorder(data, 0) });
-            for (int i = 0; i < 3; i++)
-                AddRotate();
-
-            result.Border.Add(new string[] { result.Border[0][0].Reverse(), result.Border[0][3], result.Border[0][2].Reverse(), result.Border[0][1] });
-            for (int i = 0; i < 3; i++)
-                AddRotate();
+            AddMap(data);
+            AddMap(Flip(data));
 
             return result;
-
         }
         protected override void Parse(List<string> data)
         {
@@ -93,11 +117,11 @@ namespace Day20
         {
             var result = new List<PuzzeMatch>();
             foreach (var tile in tiles)
-                for (int i = 0; i < tile.Border.Count; i++)
+                for (int i = 0; i < tile.Maps.Count; i++)
                 {
-                    var border = tile.Border[i];
-                    if ((borderBottom == null || border[0] == borderBottom) && borderRight == null || borderRight == border[3])
-                        result.Add(new PuzzeMatch { Tile = tile, borderIndex = i });
+                    var borders = tile.Maps[i].Borders;
+                    if ((borderBottom == null || borders[0] == borderBottom) && borderRight == null || borderRight == borders[3])
+                        result.Add(new PuzzeMatch { Tile = tile, MapIndex = i });
                 }
 
             return result;
@@ -114,8 +138,8 @@ namespace Day20
                 if (y == SquareBorderLength)
                     return true;
 
-                var borderRight = x > 0 ? puzzle[y, x - 1].Tile.Border[puzzle[y, x - 1].borderIndex][1] : null;
-                var borderBottom = y > 0 ? puzzle[y - 1, x].Tile.Border[puzzle[y - 1, x].borderIndex][2] : null;
+                var borderRight = x > 0 ? puzzle[y, x - 1].Tile.Maps[puzzle[y, x - 1].MapIndex].Borders[1] : null;
+                var borderBottom = y > 0 ? puzzle[y - 1, x].Tile.Maps[puzzle[y - 1, x].MapIndex].Borders[2] : null;
                 var matches = FindMatchingTiles(borderRight, borderBottom, tiles);
                 if (matches.Count > 0)
                 {
@@ -139,7 +163,6 @@ namespace Day20
             }
 
             SolvePuzzle(0, 0, Data);
-
 
             return puzzle[0, 0].Tile.ID * puzzle[SquareBorderLength - 1, 0].Tile.ID * puzzle[0, SquareBorderLength - 1].Tile.ID * puzzle[SquareBorderLength - 1, SquareBorderLength - 1].Tile.ID;
         }
