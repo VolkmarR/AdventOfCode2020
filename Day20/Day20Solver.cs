@@ -42,6 +42,8 @@ namespace Day20
     {
         List<Tile> Data;
         int SquareBorderLength;
+        PuzzeMatch[,] Puzzle;
+        List<string> BigMap;
 
         string GetVerticalBorder(List<string> data, int rowIndex)
         {
@@ -96,6 +98,7 @@ namespace Day20
 
             return result;
         }
+
         protected override void Parse(List<string> data)
         {
             Data = new();
@@ -111,6 +114,7 @@ namespace Day20
             }
 
             SquareBorderLength = (int)Math.Sqrt(Data.Count);
+            Puzzle = new PuzzeMatch[SquareBorderLength, SquareBorderLength];
         }
 
         List<PuzzeMatch> FindMatchingTiles(string borderRight, string borderBottom, List<Tile> tiles)
@@ -127,48 +131,57 @@ namespace Day20
             return result;
         }
 
+        bool SolvePuzzle(int x, int y, List<Tile> tiles)
+        {
+            if (y == SquareBorderLength)
+                return true;
 
+            var borderRight = x > 0 ? Puzzle[x - 1, y].Tile.Maps[Puzzle[x - 1, y].MapIndex].Borders[1] : null;
+            var borderBottom = y > 0 ? Puzzle[x, y - 1].Tile.Maps[Puzzle[x, y - 1].MapIndex].Borders[2] : null;
+            var matches = FindMatchingTiles(borderRight, borderBottom, tiles);
+            if (matches.Count > 0)
+            {
+                var nextX = x + 1;
+                var nextY = y;
+                if (nextX == SquareBorderLength)
+                {
+                    nextX = 0;
+                    nextY++;
+                }
+
+                foreach (var item in matches)
+                {
+                    Puzzle[x, y] = item;
+                    if (SolvePuzzle(nextX, nextY, tiles.Where(q => q != item.Tile).ToList()))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        void InitBigMap()
+        {
+            SolvePuzzle(0, 0, Data);
+            BigMap = Enumerable.Repeat("", SquareBorderLength * 8).ToList();
+            for (int y = 0; y < SquareBorderLength; y++)
+                for (int x = 0; x < SquareBorderLength; x++)
+                    for (int yy = 1; yy < 9; yy++)
+                        BigMap[y * 8 + yy - 1] += Puzzle[x, y].Tile.Maps[Puzzle[x, y].MapIndex].Map[yy][1..9];
+        }
 
         protected override object Solve1()
         {
-            var puzzle = new PuzzeMatch[SquareBorderLength, SquareBorderLength];
-            // bool Puzzle
-            bool SolvePuzzle(int x, int y, List<Tile> tiles)
-            {
-                if (y == SquareBorderLength)
-                    return true;
-
-                var borderRight = x > 0 ? puzzle[y, x - 1].Tile.Maps[puzzle[y, x - 1].MapIndex].Borders[1] : null;
-                var borderBottom = y > 0 ? puzzle[y - 1, x].Tile.Maps[puzzle[y - 1, x].MapIndex].Borders[2] : null;
-                var matches = FindMatchingTiles(borderRight, borderBottom, tiles);
-                if (matches.Count > 0)
-                {
-                    var nextX = x + 1;
-                    var nextY = y;
-                    if (nextX == SquareBorderLength)
-                    {
-                        nextX = 0;
-                        nextY++;
-                    }
-
-                    foreach (var item in matches)
-                    {
-                        puzzle[y, x] = item;
-                        if (SolvePuzzle(nextX, nextY, tiles.Where(q => q != item.Tile).ToList()))
-                            return true;
-                    }
-                }
-
-                return false;
-            }
-
             SolvePuzzle(0, 0, Data);
 
-            return puzzle[0, 0].Tile.ID * puzzle[SquareBorderLength - 1, 0].Tile.ID * puzzle[0, SquareBorderLength - 1].Tile.ID * puzzle[SquareBorderLength - 1, SquareBorderLength - 1].Tile.ID;
+            return Puzzle[0, 0].Tile.ID * Puzzle[SquareBorderLength - 1, 0].Tile.ID * Puzzle[0, SquareBorderLength - 1].Tile.ID * Puzzle[SquareBorderLength - 1, SquareBorderLength - 1].Tile.ID;
         }
 
         protected override object Solve2()
         {
+            InitBigMap();
+
+
             throw new Exception("Solver error");
         }
     }
