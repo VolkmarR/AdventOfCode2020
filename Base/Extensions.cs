@@ -34,6 +34,15 @@ namespace AdventOfCode.Base
         public static int ToInt(this string item) => int.Parse(item);
 
         public static long ToLong(this string item) => long.Parse(item);
+
+        public static string Reverse(this string text)
+        {
+            if (text == null) 
+                return null;
+
+            return new string(text.ToCharArray().Reverse().ToArray());
+        }
+
     }
 
 
