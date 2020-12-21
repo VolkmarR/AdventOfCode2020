@@ -95,7 +95,9 @@ namespace Day21
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            BuildMap();
+
+            return IngredientAllergenMap.OrderBy(q => q.Value).Select(q => q.Key).ToList().Join(",");
         }
     }
 }
