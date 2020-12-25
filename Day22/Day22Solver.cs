@@ -15,20 +15,20 @@ namespace Day22
 
         [Fact]
         public void RunStep1() => Output.WriteLine(new Day22Solver().ExecutePuzzle1());
-        
+
         [Fact]
         public void RunStep2() => Output.WriteLine(new Day22Solver().ExecutePuzzle2());
     }
 
     public class Day22Solver : SolverBase
     {
-        Dictionary<int, Queue<int>> Players;
+        Dictionary<int, Queue<int>> Game;
 
         void ParsePlayer(List<string> data)
         {
             var playerID = data[0][7..8].ToInt();
             var queue = new Queue<int>();
-            Players[playerID] = queue;
+            Game[playerID] = queue;
 
             foreach (var item in data.Skip(1))
                 queue.Enqueue(item.ToInt());
@@ -36,35 +36,70 @@ namespace Day22
 
         protected override void Parse(List<string> data)
         {
-            Players = new();
+            Game = new();
 
             ParsePlayer(data.TakeWhile(q => q != "").ToList());
             ParsePlayer(data.SkipWhile(q => q != "").Skip(1).ToList());
         }
 
-        List<int> PlayGame()
+        int PlayGame()
         {
             var round = new Dictionary<int, int>();
-            while (Players.Values.All(q => q.Count > 0))
+            while (Game.Values.All(q => q.Count > 0))
             {
                 round.Clear();
-                foreach (var player in Players.Keys)
-                    round[player] = Players[player].Dequeue();
+                foreach (var player in Game.Keys)
+                    round[player] = Game[player].Dequeue();
 
                 var winner = round.OrderByDescending(q => q.Value).ToList();
                 foreach (var item in winner)
-                    Players[winner[0].Key].Enqueue(item.Value);
+                    Game[winner[0].Key].Enqueue(item.Value);
             }
 
-            return Players.FirstOrDefault(q => q.Value.Count > 0).Value.ToList();
+            return Game.FirstOrDefault(q => q.Value.Count > 0).Key;
         }
 
-        protected override object Solve1()
+        int PlayRecursiveGame(Dictionary<int, Queue<int>> game)
         {
-            var gameResult = PlayGame();
+            var round = new Dictionary<int, int>();
+            var lastRounds = new HashSet<string>();
+            while (game.Values.All(q => q.Count > 0))
+            {
+                var currentCards = game.Select(q => q.Value.ToArray().Select(v => v.ToString()).Join(",")).Join("/");
+                if (lastRounds.Contains(currentCards))
+                    return 1;
+                lastRounds.Add(currentCards);
+
+                round.Clear();
+                foreach (var player in game.Keys)
+                    round[player] = game[player].Dequeue();
+
+                if (game.Keys.All(q => game[q].Count >= round[q]))
+                {
+                    // reverse Combat
+                    var subGame = new Dictionary<int, Queue<int>>();
+                    foreach (var player in game.Keys)
+                        subGame[player] = new Queue<int>(game[player].ToArray().Take(round[player]));
+                    var winner = PlayRecursiveGame(subGame);
+                    game[winner].Enqueue(round.First(q => q.Key == winner).Value);
+                    game[winner].Enqueue(round.First(q => q.Key != winner).Value);
+                }
+                else
+                {
+                    var winner = round.OrderByDescending(q => q.Value).ToList();
+                    foreach (var item in winner)
+                        game[winner[0].Key].Enqueue(item.Value);
+                }
+            }
+
+            return game.FirstOrDefault(q => q.Value.Count > 0).Key;
+        }
+
+        int WinningScore(int winner)
+        {
             var result = 0;
-            var multiplier = gameResult.Count;
-            foreach (var item in gameResult)
+            var multiplier = Game[winner].Count;
+            foreach (var item in Game[winner].ToArray())
             {
                 result += item * multiplier;
                 multiplier--;
@@ -72,9 +107,10 @@ namespace Day22
             return result;
         }
 
+        protected override object Solve1()
+            => WinningScore(PlayGame());
+
         protected override object Solve2()
-        {
-            throw new Exception("Solver error");
-        }
+            => WinningScore(PlayRecursiveGame(Game));
     }
 }
