@@ -23,7 +23,7 @@ namespace Day24
     public class Day24Solver : SolverBase
     {
         List<List<string>> Data;
-        HashSet<(int, int)> BlackTiles = new();
+        HashSet<(int x, int y)> BlackTiles = new();
 
         void ParseLine(string line)
         {
@@ -68,7 +68,6 @@ namespace Day24
             return pos;
         }
 
-
         (int x, int y) NavigateToTile(List<string> moves, (int x, int y) pos)
         {
             foreach (string move in moves)
@@ -85,6 +84,45 @@ namespace Day24
                 BlackTiles.Add(pos);
         }
 
+        int CountAdjacentTiles((int x, int y) pos)
+        {
+            int CheckTile(string step)
+                => BlackTiles.Contains(Step(step, pos)) ? 1 : 0;
+
+            return CheckTile("ne") +
+                CheckTile("e") +
+                CheckTile("se") +
+                CheckTile("sw") +
+                CheckTile("w") +
+                CheckTile("nw");
+        }
+
+        void MapFlipping()
+        {
+            var CheckCoordinates = BlackTiles
+                .Union(BlackTiles.Select(q => Step("ne", q)))
+                .Union(BlackTiles.Select(q => Step("e", q)))
+                .Union(BlackTiles.Select(q => Step("se", q)))
+                .Union(BlackTiles.Select(q => Step("sw", q)))
+                .Union(BlackTiles.Select(q => Step("w", q)))
+                .Union(BlackTiles.Select(q => Step("nw", q)))
+                .Distinct()
+                .ToList();
+
+            var newBlackTiles = BlackTiles.ToHashSet();
+            foreach (var item in CheckCoordinates)
+            {
+                var count = CountAdjacentTiles(item);
+                if (BlackTiles.Contains(item) && (count == 0 || count > 2))
+                    newBlackTiles.Remove(item);
+
+                if (!BlackTiles.Contains(item) && count == 2)
+                    newBlackTiles.Add(item);
+            }
+
+            BlackTiles = newBlackTiles;
+        }
+
         protected override object Solve1()
         {
             foreach (var moves in Data)
@@ -95,7 +133,13 @@ namespace Day24
 
         protected override object Solve2()
         {
-            throw new Exception("Solver error");
+            foreach (var moves in Data)
+                FlipTile(NavigateToTile(moves, (0, 0)));
+
+            for (int i = 0; i < 100; i++)
+                MapFlipping();
+
+            return BlackTiles.Count();
         }
     }
 }
