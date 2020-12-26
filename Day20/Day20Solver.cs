@@ -44,6 +44,8 @@ namespace Day20
         int SquareBorderLength;
         PuzzeMatch[,] Puzzle;
         List<string> BigMap;
+        HashSet<(int x, int y)> BigMapDictHS;
+        int MonsterParts;
 
         string GetVerticalBorder(List<string> data, int rowIndex)
         {
@@ -170,6 +172,58 @@ namespace Day20
                         BigMap[y * 8 + yy - 1] += Puzzle[x, y].Tile.Maps[Puzzle[x, y].MapIndex].Map[yy][1..9];
         }
 
+        void BigMapToDictionary()
+        {
+            BigMapDictHS = new HashSet<(int x, int y)>();
+            for (int y = 0; y < BigMap.Count; y++)
+                for (int x = 0; x < BigMap[y].Length; x++)
+                    if (BigMap[y][x] == '#')
+                        BigMapDictHS.Add((x, y));
+        }
+
+        bool MatchPart1(int x, int y)
+            => BigMapDictHS.Contains((x, y + 1)) && BigMapDictHS.Contains((x + 1, y + 2));
+        bool MatchPart2or3(int x, int y)
+            => BigMapDictHS.Contains((x, y + 2)) && BigMapDictHS.Contains((x + 1, y + 1)) && BigMapDictHS.Contains((x + 2, y + 1)) && BigMapDictHS.Contains((x + 3, y + 2));
+        bool MatchPart4(int x, int y)
+            => BigMapDictHS.Contains((x, y + 2)) && BigMapDictHS.Contains((x + 1, y + 1)) && BigMapDictHS.Contains((x + 2, y + 1)) && BigMapDictHS.Contains((x + 2, y)) && BigMapDictHS.Contains((x + 3, y + 1));
+
+        void SearchForSeaMonster()
+        {
+            BigMapToDictionary();
+            var monsterParts = 0;
+
+            for (var y = 0; y < BigMap.Count - 3; y++)
+            {
+                var monsterPart = 0;
+                var x = 0;
+                while (x < BigMap[0].Length)
+                {
+                    if (monsterPart == 0 && MatchPart1(x, y))
+                    {
+                        monsterPart = 1;
+                        x += 3;
+                    }
+                    else if ((monsterPart == 1 || monsterPart == 2) && MatchPart2or3(x, y))
+                    {
+                        monsterPart++;
+                        x += 5;
+                    }
+                    else if (monsterPart == 3 && MatchPart4(x, y))
+                    {
+                        monsterPart = 0;
+                        x += 5;
+                        monsterParts += 15;
+                    }
+                    else
+                        x++;
+                }
+            }
+
+            if (monsterParts > MonsterParts)
+                MonsterParts = monsterParts;
+        }
+
         protected override object Solve1()
         {
             SolvePuzzle(0, 0, Data);
@@ -179,10 +233,21 @@ namespace Day20
 
         protected override object Solve2()
         {
+            MonsterParts = 0;
             InitBigMap();
 
+            for (int j = 0; j < 2; j++)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    SearchForSeaMonster();
+                    BigMap = Rotate90(BigMap);
+                }
 
-            throw new Exception("Solver error");
+                BigMap = Flip(BigMap);
+            }
+
+            return BigMapDictHS.Count - MonsterParts;
         }
     }
 }
